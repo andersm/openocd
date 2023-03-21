@@ -25,11 +25,13 @@
 #endif
 
 #include <helper/system.h>
+#include <jtag/adapter.h>
 #include <libusb.h>
 #include <helper/log.h>
 #include <helper/replacements.h>
 
 #include "cmsis_dap.h"
+#include "libusb_helper.h"
 
 struct cmsis_dap_backend_data {
 	struct libusb_context *usb_ctx;
@@ -86,6 +88,9 @@ static int cmsis_dap_usb_open(struct cmsis_dap *dap, uint16_t vids[], uint16_t p
 		}
 
 		if (id_filter && !id_match)
+			continue;
+
+		if (adapter_usb_get_location() && !jtag_libusb_location_equal(dev))
 			continue;
 
 		/* Don't continue if we asked for a serial number and the device doesn't have one */
